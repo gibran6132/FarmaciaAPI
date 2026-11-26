@@ -1,36 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:orientation="vertical" android:paddingTop="12dp" android:paddingBottom="12dp">
-    <Button android:id="@+id/cargarButton" android:layout_width="match_parent" android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
+
+    <Button
+        android:id="@+id/cargarButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:text="@string/cargar_api" />
-    <ProgressBar android:id="@+id/cargaProgress" style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent" android:layout_height="4dp" android:indeterminate="true" android:visibility="gone" />
-    <TextView android:id="@+id/estadoText" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:paddingVertical="12dp" android:textColor="#176B60" android:accessibilityLiveRegion="polite" />
-    <TextView style="@style/SectionTitle" android:text="@string/consultar_title" />
-    <EditText android:id="@+id/claveInput" style="@style/CatalogoInput"
-        android:hint="@string/clave_hint" android:inputType="textCapCharacters" android:maxLines="1" />
-    <Button android:id="@+id/buscarButton" android:layout_width="match_parent" android:layout_height="wrap_content"
+
+    <ProgressBar
+        android:id="@+id/cargaProgress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:indeterminate="true"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/estadoText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:accessibilityLiveRegion="polite"
+        android:paddingVertical="12dp"
+        android:textColor="#176B60"
+        tools:text="Cargados 5 medicamentos de la API." />
+
+    <TextView
+        style="@style/SectionTitle"
+        android:text="@string/consultar_title" />
+
+    <EditText
+        android:id="@+id/claveInput"
+        style="@style/CatalogoInput"
+        android:hint="@string/clave_hint"
+        android:inputType="textCapCharacters"
+        android:maxLines="1" />
+
+    <Button
+        android:id="@+id/buscarButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:text="@string/buscar" />
-    <TextView android:id="@+id/resultadoText" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:padding="12dp" android:background="#DCEFE9" android:textColor="#173A34"
-        android:visibility="gone" android:accessibilityLiveRegion="polite" />
-    <TextView style="@style/SectionTitle" android:text="@string/administrar_title" />
-    <EditText android:id="@+id/nombreInput" style="@style/CatalogoInput"
-        android:hint="@string/nombre" android:inputType="textCapSentences" android:maxLines="1" />
-    <EditText android:id="@+id/categoriaInput" style="@style/CatalogoInput"
-        android:hint="@string/categoria" android:inputType="textCapSentences" android:maxLines="1" />
-    <EditText android:id="@+id/presentacionInput" style="@style/CatalogoInput"
-        android:hint="@string/presentacion" android:inputType="textCapSentences" android:maxLines="1" />
-    <EditText android:id="@+id/existenciaInput" style="@style/CatalogoInput"
-        android:hint="@string/existencia" android:inputType="number" android:maxLines="1" />
-    <Button android:id="@+id/guardarButton" android:layout_width="match_parent" android:layout_height="wrap_content"
+
+    <TextView
+        android:id="@+id/resultadoText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:accessibilityLiveRegion="polite"
+        android:background="#DCEFE9"
+        android:padding="12dp"
+        android:textColor="#173A34"
+        android:visibility="gone"
+        tools:text="Medicamento encontrado: Paracetamol"
+        tools:visibility="visible" />
+
+    <TextView
+        style="@style/SectionTitle"
+        android:text="@string/administrar_title" />
+
+    <EditText
+        android:id="@+id/nombreInput"
+        style="@style/CatalogoInput"
+        android:hint="@string/nombre"
+        android:inputType="textCapSentences"
+        android:maxLines="1" />
+
+    <EditText
+        android:id="@+id/categoriaInput"
+        style="@style/CatalogoInput"
+        android:hint="@string/categoria"
+        android:inputType="textCapSentences"
+        android:maxLines="1" />
+
+    <EditText
+        android:id="@+id/presentacionInput"
+        style="@style/CatalogoInput"
+        android:hint="@string/presentacion"
+        android:inputType="textCapSentences"
+        android:maxLines="1" />
+
+    <EditText
+        android:id="@+id/existenciaInput"
+        style="@style/CatalogoInput"
+        android:hint="@string/existencia"
+        android:inputType="number"
+        android:maxLines="1" />
+
+    <Button
+        android:id="@+id/guardarButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:text="@string/guardar" />
-    <Button android:id="@+id/eliminarButton" style="?android:attr/borderlessButtonStyle"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="@string/eliminar" android:textColor="#A32626" />
-    <TextView android:id="@+id/listaTitle" style="@style/SectionTitle" />
-    <TextView android:id="@+id/vacioText" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:text="@string/catalogo_vacio" android:paddingVertical="12dp" />
+
+    <Button
+        android:id="@+id/eliminarButton"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/eliminar"
+        android:textColor="#A32626" />
+
+    <TextView
+        android:id="@+id/listaTitle"
+        style="@style/SectionTitle"
+        tools:text="Lista de Medicamentos (5)" />
+
+    <TextView
+        android:id="@+id/vacioText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="12dp"
+        android:text="@string/catalogo_vacio" />
+
 </LinearLayout>

@@ -1,14 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/catalogoRoot" android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical" android:background="#F4F7FA"
-    android:focusable="true" android:focusableInTouchMode="true">
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:padding="20dp" android:text="@string/catalogo_title" android:textSize="24sp"
-        android:textStyle="bold" android:textColor="#FFFFFF" android:background="#176B60"
-        android:accessibilityHeading="true" />
-    <ListView android:id="@+id/medicamentosList" android:layout_width="match_parent"
-        android:layout_height="0dp" android:layout_weight="1" android:divider="@android:color/transparent"
-        android:dividerHeight="8dp" android:clipToPadding="false" android:paddingHorizontal="16dp"
-        android:paddingBottom="16dp" />
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/catalogoRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F4F7FA"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:accessibilityHeading="true"
+        android:background="#176B60"
+        android:padding="20dp"
+        android:text="@string/catalogo_title"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <ListView
+        android:id="@+id/medicamentosList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="8dp"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="16dp"
+        tools:listitem="@layout/item_medicamento" />
+
 </LinearLayout>
