@@ -54,22 +54,50 @@ class CRUDCatalogo : ViewModel() {
         if (mutableEstado.value.cargando) return
         diccionario.guardar(medicamento)
         mutableEstado.value = mutableEstado.value.copy(seleccionado = medicamento.copy())
-        publicar("Guardado en el diccionario: ${medicamento.clave_medicamento}")
+
+        viewModelScope.launch {
+            try {
+                val existente = diccionario.buscar(medicamento.clave_medicamento)
+                if (existente != null) {
+                    Retrofit.api.actualizarMedicamento(medicamento.clave_medicamento, medicamento)
+                } else {
+                    Retrofit.api.nuevoMedicamento(medicamento)
+                }
+                publicar("Guardado y enviado a la API: ${medicamento.clave_medicamento}")
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                publicar("Guardado localmente en el árbol: ${medicamento.clave_medicamento}")
+            }
+        }
     }
 
     fun eliminar(clave: String) {
         if (mutableEstado.value.cargando) return
-        val eliminado = diccionario.eliminar(clave)
+        val claveLimpia = clave.trim()
+        val eliminado = diccionario.eliminar(claveLimpia)
         if (eliminado) mutableEstado.value = mutableEstado.value.copy(seleccionado = null)
-        publicar(if (eliminado) "Eliminado del diccionario: ${clave.trim()}"
-            else "No se encontró el medicamento '${clave.trim()}'.")
+
+        viewModelScope.launch {
+            try {
+                Retrofit.api.eliminarMedicamento(claveLimpia)
+                publicar(if (eliminado) "Eliminado del árbol y de la API: $claveLimpia"
+                    else "No se encontró el medicamento '$claveLimpia'.")
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                publicar(if (eliminado) "Eliminado localmente del árbol: $claveLimpia"
+                    else "No se encontró el medicamento '$claveLimpia'.")
+            }
+        }
     }
 
     private fun publicar(mensaje: String) {
         val seleccion = mutableEstado.value.seleccionado?.clave_medicamento
         mutableEstado.value = CatalogoEstado(
-            medicamentos = diccionario.obtenerLista().sortedBy { it.clave_medicamento },
+            medicamentos = diccionario.obtenerLista(),
             mensaje = mensaje,
+            cargando = false,
             seleccionado = seleccion?.let { diccionario.buscar(it)?.copy() }
         )
     }
