@@ -3,6 +3,7 @@
     <style name="Theme.Farmacia" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:colorAccent">#176B60</item>
+        <item name="android:windowBackground">#F4F7FA</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>
     <style name="SectionTitle">

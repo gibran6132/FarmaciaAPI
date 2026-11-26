@@ -11,8 +11,8 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.EditText
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -31,28 +31,26 @@ class MainActivity : ComponentActivity() {
     private val medicamentosAdapter = MedicamentosAdapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         binding = ActivityCatalogoBinding.inflate(layoutInflater)
         header = HeaderCatalogoBinding.inflate(layoutInflater, binding.medicamentosList, false)
         setContentView(binding.root)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowCompat.getInsetsController(window, binding.root).apply {
-            isAppearanceLightStatusBars = true
-            isAppearanceLightNavigationBars = true
-        }
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
-            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
-            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
-            view.setPadding(bars.left, bars.top, bars.right, maxOf(bars.bottom, ime.bottom))
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        ViewCompat.requestApplyInsets(binding.root)
+
         binding.medicamentosList.addHeaderView(header.root, null, false)
         binding.medicamentosList.adapter = medicamentosAdapter
         model = ViewModelProvider(this)[CRUDCatalogo::class.java]
+
         savedInstanceState?.getStringArrayList("formulario")?.let { values ->
             campos().zip(values).forEach { (campo, valor) -> campo.setText(valor) }
         }
+
         header.cargarButton.setOnClickListener { model.cargar() }
         header.buscarButton.setOnClickListener {
             if (validarObligatorio(header.claveInput)) {
@@ -74,6 +72,7 @@ class MainActivity : ComponentActivity() {
                     }.show()
             }
         }
+
         binding.medicamentosList.setOnItemClickListener { parent, _, position, _ ->
             (parent.getItemAtPosition(position) as? Medicamento)?.let {
                 model.buscar(it.clave_medicamento)
@@ -81,6 +80,7 @@ class MainActivity : ComponentActivity() {
                 binding.medicamentosList.smoothScrollToPosition(0)
             }
         }
+
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 model.estado.collect { estado ->
