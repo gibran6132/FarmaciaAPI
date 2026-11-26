@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingTop="12dp"
-    android:paddingBottom="12dp">
+    android:paddingBottom="12dp"
+    tools:context=".MainActivity">
 
     <Button
         android:id="@+id/cargarButton"

@@ -6,7 +6,8 @@
     android:background="@drawable/catalogo_item_background"
     android:minHeight="80dp"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    tools:showIn="@layout/activity_catalogo">
 
     <TextView
         android:id="@+id/nombreText"
