@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">Farmacia</string>
+    <string name="catalogo_title">Catálogo de medicamentos</string>
+    <string name="cargar_api">Cargar catálogo desde API</string>
+    <string name="consultar_title">Consultar por clave</string>
+    <string name="clave_hint">Clave (ej. MED-001)</string>
+    <string name="buscar">Buscar</string>
+    <string name="administrar_title">Administrar medicamento</string>
+    <string name="nombre">Nombre</string>
+    <string name="categoria">Categoría</string>
+    <string name="presentacion">Presentación</string>
+    <string name="existencia">Existencia (piezas)</string>
+    <string name="guardar">Guardar / Editar</string>
+    <string name="eliminar">Eliminar</string>
+    <string name="catalogo_vacio">No hay medicamentos. Carga el catálogo o agrega uno.</string>
+    <string name="lista_total">Medicamentos (%1$d)</string>
+    <string name="fila_nombre">[%1$s] %2$s</string>
+    <string name="fila_detalle">%1$s · %2$s</string>
+    <string name="stock">Existencia: %1$d piezas</string>
+    <string name="resultado">Medicamento: %1$s\nCategoría: %2$s\nPresentación: %3$s\nExistencia actual: %4$d piezas</string>
+    <string name="campo_obligatorio">Completa este campo.</string>
+    <string name="existencia_invalida">Escribe un entero de 0 a 2147483647.</string>
+    <string name="eliminar_title">¿Eliminar medicamento?</string>
+    <string name="eliminar_confirmacion">Se eliminará %1$s del catálogo local.</string>
+    <string name="cancelar">Cancelar</string>
+</resources>
