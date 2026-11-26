@@ -34,7 +34,8 @@ class CRUDCatalogo : ViewModel() {
                 throw e
             } catch (e: Exception) {
                 mutableEstado.value = mutableEstado.value.copy(
-                    cargando = false, mensaje = "No se pudo cargar el catálogo. Revisa tu conexión e intenta de nuevo."
+                    cargando = false,
+                    mensaje = "Error al cargar la API: ${e.message}"
                 )
             }
         }
@@ -52,22 +53,28 @@ class CRUDCatalogo : ViewModel() {
 
     fun guardar(medicamento: Medicamento) {
         if (mutableEstado.value.cargando) return
-        diccionario.guardar(medicamento)
-        mutableEstado.value = mutableEstado.value.copy(seleccionado = medicamento.copy())
+        val claveLimpia = medicamento.clave_medicamento.trim()
+        val existePrevio = diccionario.buscar(claveLimpia) != null
 
+        mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Enviando a la API...")
         viewModelScope.launch {
             try {
-                val existente = diccionario.buscar(medicamento.clave_medicamento)
-                if (existente != null) {
-                    Retrofit.api.actualizarMedicamento(medicamento.clave_medicamento, medicamento)
+                if (existePrevio) {
+                    Retrofit.api.actualizarMedicamento(claveLimpia, medicamento)
                 } else {
                     Retrofit.api.nuevoMedicamento(medicamento)
                 }
-                publicar("Guardado y enviado a la API: ${medicamento.clave_medicamento}")
+                val respuesta = Retrofit.api.obtenerMedicamentos()
+                diccionario.cargarLista(respuesta.datos)
+                mutableEstado.value = mutableEstado.value.copy(seleccionado = medicamento.copy())
+                publicar("Guardado con éxito en la API: $claveLimpia")
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                publicar("Guardado localmente en el árbol: ${medicamento.clave_medicamento}")
+                mutableEstado.value = mutableEstado.value.copy(
+                    cargando = false,
+                    mensaje = "Error en la API al guardar '$claveLimpia': ${e.message}"
+                )
             }
         }
     }
@@ -75,19 +82,22 @@ class CRUDCatalogo : ViewModel() {
     fun eliminar(clave: String) {
         if (mutableEstado.value.cargando) return
         val claveLimpia = clave.trim()
-        val eliminado = diccionario.eliminar(claveLimpia)
-        if (eliminado) mutableEstado.value = mutableEstado.value.copy(seleccionado = null)
+        mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Eliminando en la API...")
 
         viewModelScope.launch {
             try {
                 Retrofit.api.eliminarMedicamento(claveLimpia)
-                publicar(if (eliminado) "Eliminado del árbol y de la API: $claveLimpia"
-                    else "No se encontró el medicamento '$claveLimpia'.")
+                val respuesta = Retrofit.api.obtenerMedicamentos()
+                diccionario.cargarLista(respuesta.datos)
+                mutableEstado.value = mutableEstado.value.copy(seleccionado = null)
+                publicar("Eliminado con éxito de la API: $claveLimpia")
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                publicar(if (eliminado) "Eliminado localmente del árbol: $claveLimpia"
-                    else "No se encontró el medicamento '$claveLimpia'.")
+                mutableEstado.value = mutableEstado.value.copy(
+                    cargando = false,
+                    mensaje = "Error en la API al eliminar '$claveLimpia': ${e.message}"
+                )
             }
         }
     }
