@@ -1,5 +1,6 @@
 package com.farm.farmacia
-//Ozuna Ramos Gibran
+
+// Ozuna Ramos Gibran
 
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -14,11 +15,9 @@ interface FarmaciaAPI {
     @GET("catalogo_medicamentos")
     suspend fun obtenerMedicamentos(): Catalogo
 
-    //@Body convierte el obj de kotlin a JSON
     @POST("catalogo_medicamentos")
     suspend fun nuevoMedicamento(@Body medicamento: Medicamento): Response<ResponseBody>
 
-    //@Path sustituye clave por la clave real (MED-014)
     @PUT("catalogo_medicamentos/{clave}")
     suspend fun actualizarMedicamento(@Path("clave") clave: String, @Body medicamento: Medicamento): Response<ResponseBody>
 

@@ -1,7 +1,7 @@
 package com.farm.farmacia
-//Ozuna Ramos Gibran
 
-// Entidad tonta
+// Ozuna Ramos Gibran
+
 data class Medicamento(
     var clave_medicamento: String = "",
     var nombre: String = "",

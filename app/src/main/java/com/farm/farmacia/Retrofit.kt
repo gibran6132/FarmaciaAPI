@@ -1,13 +1,12 @@
 package com.farm.farmacia
+
+// Ozuna Ramos Gibran
+
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-//Ozuna Ramos Gibran
-
 object Retrofit {
-
-    private const val BASE_URL =
-        "https://servicios-proyecto-ed.vercel.app/api/v1/"
+    private const val BASE_URL = "https://servicios-proyecto-ed.vercel.app/api/v1/"
 
     val api: FarmaciaAPI by lazy {
         Retrofit.Builder()
