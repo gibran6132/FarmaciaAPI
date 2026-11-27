@@ -7,6 +7,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.ResponseBody
+import retrofit2.Response
 
 data class CatalogoEstado(
     val medicamentos: List<Medicamento> = emptyList(),
@@ -53,58 +55,76 @@ class CRUDCatalogo : ViewModel() {
         return medicamento
     }
 
-    // POST / PUT: Guardar/Actualizar en la API y refrescar en el árbol
+    // POST / PUT: Guardar/Actualizar en la API
     fun guardar(medicamento: Medicamento) {
         if (mutableEstado.value.cargando) return
         val claveLimpia = medicamento.clave_medicamento.trim()
         val existePrevio = diccionario.buscar(claveLimpia) != null
 
-        mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Enviando datos a la API...")
+        mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Enviando HTTP a la API...")
         viewModelScope.launch {
             try {
-                if (existePrevio) {
-                    // PUT al servidor
+                val respuesta: Response<ResponseBody> = if (existePrevio) {
                     Retrofit.api.actualizarMedicamento(claveLimpia, medicamento)
                 } else {
-                    // POST al servidor
                     Retrofit.api.nuevoMedicamento(medicamento)
                 }
-                // Actualizamos el árbol local con la nueva información
-                diccionario.guardar(medicamento)
-                mutableEstado.value = mutableEstado.value.copy(seleccionado = medicamento.copy())
-                publicar("Operación (POST/PUT) exitosa en la API para: $claveLimpia")
+                val codigo = respuesta.code()
+                val respuestaTexto = respuesta.body()?.string() ?: ""
+
+                if (respuesta.isSuccessful) {
+                    diccionario.guardar(medicamento)
+                    mutableEstado.value = mutableEstado.value.copy(seleccionado = medicamento.copy())
+                    publicar("HTTP $codigo [${if (existePrevio) "PUT" else "POST"} OK]: $claveLimpia | Servidor: $respuestaTexto")
+                } else {
+                    val errorTexto = respuesta.errorBody()?.string() ?: "Error de servidor"
+                    mutableEstado.value = mutableEstado.value.copy(
+                        cargando = false,
+                        mensaje = "HTTP $codigo [Error API]: $errorTexto"
+                    )
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 mutableEstado.value = mutableEstado.value.copy(
                     cargando = false,
-                    mensaje = "Error al enviar a la API: ${e.message}"
+                    mensaje = "Error de red al conectar con la API: ${e.message}"
                 )
             }
         }
     }
 
-    // DELETE: Eliminar en la API y remover del árbol
+    // DELETE: Eliminar en la API
     fun eliminar(clave: String) {
         if (mutableEstado.value.cargando) return
         val claveLimpia = clave.trim()
-        mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Enviando DELETE a la API...")
+        mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Enviando DELETE HTTP a la API...")
 
         viewModelScope.launch {
             try {
-                // DELETE al servidor
-                Retrofit.api.eliminarMedicamento(claveLimpia)
-                val eliminado = diccionario.eliminar(claveLimpia)
-                if (eliminado) {
-                    mutableEstado.value = mutableEstado.value.copy(seleccionado = null)
+                val respuesta = Retrofit.api.eliminarMedicamento(claveLimpia)
+                val codigo = respuesta.code()
+                val respuestaTexto = respuesta.body()?.string() ?: ""
+
+                if (respuesta.isSuccessful) {
+                    val eliminado = diccionario.eliminar(claveLimpia)
+                    if (eliminado) {
+                        mutableEstado.value = mutableEstado.value.copy(seleccionado = null)
+                    }
+                    publicar("HTTP $codigo [DELETE OK]: $claveLimpia | Servidor: $respuestaTexto")
+                } else {
+                    val errorTexto = respuesta.errorBody()?.string() ?: "Error de servidor"
+                    mutableEstado.value = mutableEstado.value.copy(
+                        cargando = false,
+                        mensaje = "HTTP $codigo [Error DELETE]: $errorTexto"
+                    )
                 }
-                publicar("Eliminado con éxito (DELETE) de la API: $claveLimpia")
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 mutableEstado.value = mutableEstado.value.copy(
                     cargando = false,
-                    mensaje = "Error al eliminar en la API: ${e.message}"
+                    mensaje = "Error de red al eliminar en la API: ${e.message}"
                 )
             }
         }
