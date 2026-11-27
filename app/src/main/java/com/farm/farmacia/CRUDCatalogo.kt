@@ -22,6 +22,7 @@ class CRUDCatalogo : ViewModel() {
 
     init { cargar() }
 
+    // GET: Cargar catálogo desde la API
     fun cargar() {
         if (mutableEstado.value.cargando) return
         mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Cargando desde la API...")
@@ -29,74 +30,81 @@ class CRUDCatalogo : ViewModel() {
             try {
                 val respuesta = Retrofit.api.obtenerMedicamentos()
                 diccionario.cargarLista(respuesta.datos)
-                publicar("Cargados ${diccionario.obtenerLista().size} medicamentos de la API.")
+                publicar("Cargados ${diccionario.obtenerLista().size} medicamentos desde la API.")
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 mutableEstado.value = mutableEstado.value.copy(
                     cargando = false,
-                    mensaje = "Error al cargar la API: ${e.message}"
+                    mensaje = "Error al conectar con la API: ${e.message}"
                 )
             }
         }
     }
 
+    // BUSCAR: Búsqueda por clave en el Árbol Binario
     fun buscar(clave: String): Medicamento? {
         val medicamento = diccionario.buscar(clave)
         mutableEstado.value = mutableEstado.value.copy(
             seleccionado = medicamento?.copy(),
             mensaje = if (medicamento == null) "No se encontró el medicamento '${clave.trim()}'."
-                else "Medicamento encontrado."
+                else "Medicamento encontrado en el árbol."
         )
         return medicamento
     }
 
+    // POST / PUT: Guardar/Actualizar en la API y refrescar en el árbol
     fun guardar(medicamento: Medicamento) {
         if (mutableEstado.value.cargando) return
         val claveLimpia = medicamento.clave_medicamento.trim()
         val existePrevio = diccionario.buscar(claveLimpia) != null
 
-        mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Enviando a la API...")
+        mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Enviando datos a la API...")
         viewModelScope.launch {
             try {
                 if (existePrevio) {
+                    // PUT al servidor
                     Retrofit.api.actualizarMedicamento(claveLimpia, medicamento)
                 } else {
+                    // POST al servidor
                     Retrofit.api.nuevoMedicamento(medicamento)
                 }
-                val respuesta = Retrofit.api.obtenerMedicamentos()
-                diccionario.cargarLista(respuesta.datos)
+                // Actualizamos el árbol local con la nueva información
+                diccionario.guardar(medicamento)
                 mutableEstado.value = mutableEstado.value.copy(seleccionado = medicamento.copy())
-                publicar("Guardado con éxito en la API: $claveLimpia")
+                publicar("Operación (POST/PUT) exitosa en la API para: $claveLimpia")
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 mutableEstado.value = mutableEstado.value.copy(
                     cargando = false,
-                    mensaje = "Error en la API al guardar '$claveLimpia': ${e.message}"
+                    mensaje = "Error al enviar a la API: ${e.message}"
                 )
             }
         }
     }
 
+    // DELETE: Eliminar en la API y remover del árbol
     fun eliminar(clave: String) {
         if (mutableEstado.value.cargando) return
         val claveLimpia = clave.trim()
-        mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Eliminando en la API...")
+        mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Enviando DELETE a la API...")
 
         viewModelScope.launch {
             try {
+                // DELETE al servidor
                 Retrofit.api.eliminarMedicamento(claveLimpia)
-                val respuesta = Retrofit.api.obtenerMedicamentos()
-                diccionario.cargarLista(respuesta.datos)
-                mutableEstado.value = mutableEstado.value.copy(seleccionado = null)
-                publicar("Eliminado con éxito de la API: $claveLimpia")
+                val eliminado = diccionario.eliminar(claveLimpia)
+                if (eliminado) {
+                    mutableEstado.value = mutableEstado.value.copy(seleccionado = null)
+                }
+                publicar("Eliminado con éxito (DELETE) de la API: $claveLimpia")
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 mutableEstado.value = mutableEstado.value.copy(
                     cargando = false,
-                    mensaje = "Error en la API al eliminar '$claveLimpia': ${e.message}"
+                    mensaje = "Error al eliminar en la API: ${e.message}"
                 )
             }
         }
