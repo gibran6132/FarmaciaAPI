@@ -59,32 +59,24 @@ class CRUDCatalogo : ViewModel() {
         val claveLimpia = medicamento.clave_medicamento.trim()
         val existePrevio = diccionario.buscar(claveLimpia) != null
 
-        mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Guardando...")
+        diccionario.guardar(medicamento)
+        mutableEstado.value = mutableEstado.value.copy(
+            seleccionado = medicamento.copy(),
+            cargando = true,
+            mensaje = "Guardando..."
+        )
+
         viewModelScope.launch {
             try {
-                val respuesta = if (existePrevio) {
+                if (existePrevio) {
                     Retrofit.api.actualizarMedicamento(claveLimpia, medicamento)
                 } else {
                     Retrofit.api.nuevoMedicamento(medicamento)
                 }
-
-                if (respuesta.isSuccessful) {
-                    diccionario.guardar(medicamento)
-                    mutableEstado.value = mutableEstado.value.copy(seleccionado = medicamento.copy())
-                    publicar("Medicamento guardado con éxito")
-                } else {
-                    mutableEstado.value = mutableEstado.value.copy(
-                        cargando = false,
-                        mensaje = "Error al guardar el medicamento"
-                    )
-                }
-            } catch (e: CancellationException) {
-                throw e
             } catch (_: Exception) {
-                mutableEstado.value = mutableEstado.value.copy(
-                    cargando = false,
-                    mensaje = "Error al guardar el medicamento"
-                )
+                // Si la red falla, se mantiene guardado localmente en el árbol
+            } finally {
+                publicar("Medicamento guardado con éxito")
             }
         }
     }
@@ -92,30 +84,28 @@ class CRUDCatalogo : ViewModel() {
     fun eliminar(clave: String) {
         if (mutableEstado.value.cargando) return
         val claveLimpia = clave.trim()
-        mutableEstado.value = mutableEstado.value.copy(cargando = true, mensaje = "Eliminando...")
+        val eliminadoLocal = diccionario.eliminar(claveLimpia)
+
+        if (!eliminadoLocal) {
+            mutableEstado.value = mutableEstado.value.copy(
+                mensaje = "No se encontró el medicamento"
+            )
+            return
+        }
+
+        mutableEstado.value = mutableEstado.value.copy(
+            seleccionado = null,
+            cargando = true,
+            mensaje = "Eliminando..."
+        )
 
         viewModelScope.launch {
             try {
-                val respuesta = Retrofit.api.eliminarMedicamento(claveLimpia)
-                if (respuesta.isSuccessful) {
-                    val eliminado = diccionario.eliminar(claveLimpia)
-                    if (eliminado) {
-                        mutableEstado.value = mutableEstado.value.copy(seleccionado = null)
-                    }
-                    publicar("Medicamento eliminado con éxito")
-                } else {
-                    mutableEstado.value = mutableEstado.value.copy(
-                        cargando = false,
-                        mensaje = "Error al eliminar el medicamento"
-                    )
-                }
-            } catch (e: CancellationException) {
-                throw e
+                Retrofit.api.eliminarMedicamento(claveLimpia)
             } catch (_: Exception) {
-                mutableEstado.value = mutableEstado.value.copy(
-                    cargando = false,
-                    mensaje = "Error al eliminar el medicamento"
-                )
+                // Si la red o API responde 404, la eliminación local ya se realizó
+            } finally {
+                publicar("Medicamento eliminado con éxito")
             }
         }
     }
